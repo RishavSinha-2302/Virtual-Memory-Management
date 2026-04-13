@@ -1,0 +1,54 @@
+{
+  "name": "Context Switching",
+  "description": "Multiple processes alternate execution, triggering TLB flushes on each context switch and demonstrating per-process page table isolation.",
+  "processes": [
+    {
+      "name": "Editor",
+      "regions": [
+        { "name": "code", "start_vpn": 0, "end_vpn": 63, "read_write": false, "no_execute": false },
+        { "name": "heap", "start_vpn": 64, "end_vpn": 191, "read_write": true, "no_execute": true }
+      ]
+    },
+    {
+      "name": "Compiler",
+      "regions": [
+        { "name": "code", "start_vpn": 0, "end_vpn": 63, "read_write": false, "no_execute": false },
+        { "name": "heap", "start_vpn": 64, "end_vpn": 191, "read_write": true, "no_execute": true }
+      ]
+    },
+    {
+      "name": "Browser",
+      "regions": [
+        { "name": "code", "start_vpn": 0, "end_vpn": 63, "read_write": false, "no_execute": false },
+        { "name": "heap", "start_vpn": 64, "end_vpn": 191, "read_write": true, "no_execute": true }
+      ]
+    }
+  ],
+  "accesses": [
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "read" },
+    { "pid": 1, "vpn": 64, "type": "write" },
+    { "pid": 2, "vpn": 0, "type": "read" },
+    { "pid": 2, "vpn": 1, "type": "read" },
+    { "pid": 2, "vpn": 64, "type": "write" },
+    { "pid": 3, "vpn": 0, "type": "read" },
+    { "pid": 3, "vpn": 1, "type": "read" },
+    { "pid": 3, "vpn": 64, "type": "write" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 65, "type": "write" },
+    { "pid": 2, "vpn": 0, "type": "read" },
+    { "pid": 2, "vpn": 65, "type": "write" },
+    { "pid": 3, "vpn": 0, "type": "read" },
+    { "pid": 3, "vpn": 65, "type": "write" },
+    { "pid": 1, "vpn": 2, "type": "read" },
+    { "pid": 1, "vpn": 66, "type": "write" },
+    { "pid": 2, "vpn": 2, "type": "read" },
+    { "pid": 2, "vpn": 66, "type": "write" },
+    { "pid": 3, "vpn": 2, "type": "read" },
+    { "pid": 3, "vpn": 66, "type": "write" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 2, "vpn": 0, "type": "read" },
+    { "pid": 3, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 64, "type": "read" }
+  ]
+}

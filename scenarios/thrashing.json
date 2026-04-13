@@ -1,0 +1,72 @@
+{
+  "name": "Thrashing",
+  "description": "Multiple processes compete for very limited physical frames, causing severe thrashing with high page fault rates.",
+  "config": {
+    "total_frames": 20,
+    "non_paged_frames": 4,
+    "working_set_window": 5,
+    "thrashing_threshold": 0.5
+  },
+  "processes": [
+    {
+      "name": "ProcessA",
+      "regions": [
+        { "name": "data", "start_vpn": 0, "end_vpn": 127, "read_write": true, "no_execute": true }
+      ]
+    },
+    {
+      "name": "ProcessB",
+      "regions": [
+        { "name": "data", "start_vpn": 0, "end_vpn": 127, "read_write": true, "no_execute": true }
+      ]
+    },
+    {
+      "name": "ProcessC",
+      "regions": [
+        { "name": "data", "start_vpn": 0, "end_vpn": 127, "read_write": true, "no_execute": true }
+      ]
+    }
+  ],
+  "accesses": [
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "write" },
+    { "pid": 2, "vpn": 0, "type": "read" },
+    { "pid": 2, "vpn": 1, "type": "write" },
+    { "pid": 3, "vpn": 0, "type": "read" },
+    { "pid": 3, "vpn": 1, "type": "write" },
+    { "pid": 1, "vpn": 2, "type": "read" },
+    { "pid": 1, "vpn": 3, "type": "write" },
+    { "pid": 2, "vpn": 2, "type": "read" },
+    { "pid": 2, "vpn": 3, "type": "write" },
+    { "pid": 3, "vpn": 2, "type": "read" },
+    { "pid": 3, "vpn": 3, "type": "write" },
+    { "pid": 1, "vpn": 4, "type": "read" },
+    { "pid": 1, "vpn": 5, "type": "write" },
+    { "pid": 2, "vpn": 4, "type": "read" },
+    { "pid": 2, "vpn": 5, "type": "write" },
+    { "pid": 3, "vpn": 4, "type": "read" },
+    { "pid": 3, "vpn": 5, "type": "write" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 2, "vpn": 0, "type": "read" },
+    { "pid": 3, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 6, "type": "write" },
+    { "pid": 2, "vpn": 6, "type": "write" },
+    { "pid": 3, "vpn": 6, "type": "write" },
+    { "pid": 1, "vpn": 7, "type": "read" },
+    { "pid": 2, "vpn": 7, "type": "read" },
+    { "pid": 3, "vpn": 7, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "read" },
+    { "pid": 2, "vpn": 1, "type": "read" },
+    { "pid": 3, "vpn": 1, "type": "read" },
+    { "pid": 1, "vpn": 8, "type": "write" },
+    { "pid": 2, "vpn": 8, "type": "write" },
+    { "pid": 3, "vpn": 8, "type": "write" },
+    { "pid": 1, "vpn": 9, "type": "read" },
+    { "pid": 2, "vpn": 9, "type": "read" },
+    { "pid": 3, "vpn": 9, "type": "read" },
+    { "pid": 1, "vpn": 2, "type": "read" },
+    { "pid": 2, "vpn": 2, "type": "read" },
+    { "pid": 3, "vpn": 2, "type": "read" },
+    { "pid": 1, "vpn": 10, "type": "write" }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Dirty Pages",
+  "description": "Heavy write workload demonstrating dirty page handling — the WSClock algorithm must write dirty pages to swap before eviction, preferring clean pages when available.",
+  "config": {
+    "total_frames": 24,
+    "non_paged_frames": 4
+  },
+  "processes": [
+    {
+      "name": "Writer",
+      "regions": [
+        { "name": "data", "start_vpn": 0, "end_vpn": 127, "read_write": true, "no_execute": true }
+      ]
+    }
+  ],
+  "accesses": [
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "write" },
+    { "pid": 1, "vpn": 2, "type": "write" },
+    { "pid": 1, "vpn": 3, "type": "write" },
+    { "pid": 1, "vpn": 4, "type": "read" },
+    { "pid": 1, "vpn": 5, "type": "write" },
+    { "pid": 1, "vpn": 6, "type": "write" },
+    { "pid": 1, "vpn": 7, "type": "read" },
+    { "pid": 1, "vpn": 8, "type": "write" },
+    { "pid": 1, "vpn": 9, "type": "write" },
+    { "pid": 1, "vpn": 10, "type": "write" },
+    { "pid": 1, "vpn": 11, "type": "read" },
+    { "pid": 1, "vpn": 12, "type": "write" },
+    { "pid": 1, "vpn": 13, "type": "write" },
+    { "pid": 1, "vpn": 14, "type": "write" },
+    { "pid": 1, "vpn": 15, "type": "read" },
+    { "pid": 1, "vpn": 16, "type": "write" },
+    { "pid": 1, "vpn": 17, "type": "write" },
+    { "pid": 1, "vpn": 18, "type": "write" },
+    { "pid": 1, "vpn": 19, "type": "write" },
+    { "pid": 1, "vpn": 20, "type": "write" },
+    { "pid": 1, "vpn": 21, "type": "write" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 4, "type": "read" },
+    { "pid": 1, "vpn": 7, "type": "read" },
+    { "pid": 1, "vpn": 22, "type": "write" },
+    { "pid": 1, "vpn": 23, "type": "write" },
+    { "pid": 1, "vpn": 1, "type": "write" },
+    { "pid": 1, "vpn": 24, "type": "write" },
+    { "pid": 1, "vpn": 25, "type": "write" }
+  ]
+}

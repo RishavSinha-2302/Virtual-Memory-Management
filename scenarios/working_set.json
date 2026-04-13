@@ -1,0 +1,46 @@
+{
+  "name": "Working Set Locality",
+  "description": "A process exhibits clear temporal locality phases — working on a small set of pages, then shifting to a new set, demonstrating working set transitions.",
+  "processes": [
+    {
+      "name": "PhaseApp",
+      "regions": [
+        { "name": "data", "start_vpn": 0, "end_vpn": 255, "read_write": true, "no_execute": true }
+      ]
+    }
+  ],
+  "accesses": [
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "read" },
+    { "pid": 1, "vpn": 2, "type": "write" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "write" },
+    { "pid": 1, "vpn": 2, "type": "read" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "read" },
+    { "pid": 1, "vpn": 2, "type": "write" },
+    { "pid": 1, "vpn": 3, "type": "read" },
+
+    { "pid": 1, "vpn": 50, "type": "read" },
+    { "pid": 1, "vpn": 51, "type": "write" },
+    { "pid": 1, "vpn": 52, "type": "read" },
+    { "pid": 1, "vpn": 50, "type": "read" },
+    { "pid": 1, "vpn": 51, "type": "read" },
+    { "pid": 1, "vpn": 52, "type": "write" },
+    { "pid": 1, "vpn": 50, "type": "write" },
+    { "pid": 1, "vpn": 53, "type": "read" },
+    { "pid": 1, "vpn": 51, "type": "read" },
+    { "pid": 1, "vpn": 52, "type": "read" },
+
+    { "pid": 1, "vpn": 100, "type": "read" },
+    { "pid": 1, "vpn": 101, "type": "write" },
+    { "pid": 1, "vpn": 102, "type": "read" },
+    { "pid": 1, "vpn": 100, "type": "read" },
+    { "pid": 1, "vpn": 103, "type": "write" },
+    { "pid": 1, "vpn": 101, "type": "read" },
+    { "pid": 1, "vpn": 102, "type": "write" },
+    { "pid": 1, "vpn": 100, "type": "read" },
+    { "pid": 1, "vpn": 103, "type": "read" },
+    { "pid": 1, "vpn": 101, "type": "read" }
+  ]
+}

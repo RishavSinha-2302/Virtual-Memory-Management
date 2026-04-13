@@ -1,0 +1,36 @@
+{
+  "name": "Basic Paging",
+  "description": "Single process with sequential and random memory accesses demonstrating basic paging, TLB behaviour, and demand-zero page faults.",
+  "processes": [
+    {
+      "name": "BasicApp",
+      "regions": [
+        { "name": "code", "start_vpn": 0, "end_vpn": 63, "read_write": false, "no_execute": false },
+        { "name": "heap", "start_vpn": 64, "end_vpn": 191, "read_write": true, "no_execute": true },
+        { "name": "stack", "start_vpn": 192, "end_vpn": 255, "read_write": true, "no_execute": true }
+      ]
+    }
+  ],
+  "accesses": [
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "read" },
+    { "pid": 1, "vpn": 2, "type": "read" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 1, "type": "read" },
+    { "pid": 1, "vpn": 64, "type": "write" },
+    { "pid": 1, "vpn": 65, "type": "write" },
+    { "pid": 1, "vpn": 66, "type": "read" },
+    { "pid": 1, "vpn": 64, "type": "read" },
+    { "pid": 1, "vpn": 192, "type": "write" },
+    { "pid": 1, "vpn": 193, "type": "write" },
+    { "pid": 1, "vpn": 192, "type": "read" },
+    { "pid": 1, "vpn": 3, "type": "read" },
+    { "pid": 1, "vpn": 4, "type": "read" },
+    { "pid": 1, "vpn": 67, "type": "write" },
+    { "pid": 1, "vpn": 68, "type": "read" },
+    { "pid": 1, "vpn": 194, "type": "write" },
+    { "pid": 1, "vpn": 0, "type": "read" },
+    { "pid": 1, "vpn": 64, "type": "read" },
+    { "pid": 1, "vpn": 192, "type": "read" }
+  ]
+}

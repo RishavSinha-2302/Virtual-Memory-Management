@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interactive Virtual Memory Management Simulator with 4-level page tables, WSClock page replacement, TLB, swapping, and thrashing detection.">
+  <title>Virtual Memory Simulator</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- ── Top bar ─────────────────────────────────────────────────── -->
+<header class="topbar">
+  <div style="display:flex;align-items:center;">
+    <span class="topbar__title">⚙ Virtual Memory Simulator</span>
+    <span class="topbar__subtitle">4-Level Paging · WSClock · TLB · Swap</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="topbar__time" id="sim-time">T = 0</span>
+    <span id="scenario-label" class="panel__badge" style="display:none;"></span>
+  </div>
+</header>
+
+<!-- ── Thrashing banner ───────────────────────────────────────── -->
+<div class="thrashing-banner" id="thrashing-banner">
+  <span class="thrashing-banner__icon">⚠</span>
+  <span class="thrashing-banner__text" id="thrashing-text">Thrashing detected!</span>
+</div>
+
+<main class="app-layout">
+
+  <!-- ── Control panel ───────────────────────────────────────── -->
+  <section class="panel control-panel" id="control-panel">
+    <button class="btn btn--primary" id="btn-step" title="Execute next step">▶ Step</button>
+    <button class="btn btn--primary" id="btn-run" title="Auto-run steps">▶▶ Run</button>
+    <button class="btn" id="btn-pause" title="Pause auto-run" style="display:none;">⏸ Pause</button>
+    <button class="btn btn--danger" id="btn-reset" title="Reset simulation">↺ Reset</button>
+
+    <div class="control-sep"></div>
+
+    <span class="control-label">Scenario:</span>
+    <select class="control-select" id="scenario-select" style="min-width:140px;">
+      <option value="">— none —</option>
+    </select>
+    <button class="btn" id="btn-load-scenario">Load</button>
+
+    <div class="control-sep"></div>
+
+    <button class="btn btn--success" id="btn-create-process">+ Process</button>
+    <button class="btn" id="btn-manual-access" title="Manually trigger a memory access">📝 Access</button>
+
+    <div class="control-sep"></div>
+
+    <span class="control-label">Speed:</span>
+    <input type="range" id="speed-slider" min="50" max="1000" value="300" style="width:80px;accent-color:var(--accent-indigo);">
+    <span id="speed-label" class="control-label">300ms</span>
+
+    <div class="control-sep"></div>
+
+    <span class="control-label" id="scenario-remaining" style="color:var(--accent-cyan);"></span>
+  </section>
+
+  <!-- ── Stats bar ───────────────────────────────────────────── -->
+  <section class="stats-bar panel" id="stats-bar">
+    <div class="stat-card">
+      <div class="stat-card__label">Accesses</div>
+      <div class="stat-card__value stat-card__value--indigo" id="stat-accesses">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Page Faults</div>
+      <div class="stat-card__value stat-card__value--rose" id="stat-faults">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Fault Rate</div>
+      <div class="stat-card__value stat-card__value--amber" id="stat-fault-rate">0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">TLB Hit Rate</div>
+      <div class="stat-card__value stat-card__value--emerald" id="stat-tlb-rate">0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Evictions</div>
+      <div class="stat-card__value stat-card__value--violet" id="stat-evictions">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Swap I/O</div>
+      <div class="stat-card__value stat-card__value--cyan" id="stat-swap-io">0 / 0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Free Frames</div>
+      <div class="stat-card__value stat-card__value--emerald" id="stat-free-frames">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Ctx Switches</div>
+      <div class="stat-card__value stat-card__value--violet" id="stat-ctx-switches">0</div>
+    </div>
+    <div class="stat-card stat-card--cr3">
+      <div class="stat-card__label">CR3 Register</div>
+      <div class="stat-card__value stat-card__value--cyan" id="cr3-value">—</div>
+      <div class="stat-card__sublabel" id="cr3-pid">No active process</div>
+    </div>
+  </section>
+
+  <!-- ── Physical Memory Map ─────────────────────────────────── -->
+  <section class="panel" id="frame-panel">
+    <div class="panel__header">
+      <span class="panel__title">Physical Memory (Frames)</span>
+      <span class="panel__badge" id="frame-badge">0 / 64</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(100,116,139,0.3);"></div>Free</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(99,102,241,0.5);"></div>Allocated</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(251,191,36,0.5);"></div>Dirty</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(251,113,133,0.5);"></div>Non-Paged</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(167,139,250,0.5);"></div>Page Table</div>
+    </div>
+    <div class="mem-grid" id="frame-grid"></div>
+  </section>
+
+  <!-- ── Processes + Page Table ───────────────────────────────── -->
+  <section class="panel" id="process-panel">
+    <div class="panel__header">
+      <span class="panel__title">Processes</span>
+      <span class="panel__badge" id="proc-badge">0 processes</span>
+    </div>
+    <div class="panel-scroll" id="process-list"></div>
+
+    <div style="margin-top:14px; border-top:1px solid var(--glass-border); padding-top:12px;">
+      <div class="panel__header">
+        <span class="panel__title">Page Table Viewer</span>
+      </div>
+      <div class="pt-selector" id="pt-selector"></div>
+      <div class="panel-scroll" id="pt-tree" style="max-height:280px;"></div>
+    </div>
+  </section>
+
+  <!-- ── Swap Space ──────────────────────────────────────────── -->
+  <section class="panel" id="swap-panel">
+    <div class="panel__header">
+      <span class="panel__title">Swap Space</span>
+      <span class="panel__badge" id="swap-badge">0 / 128</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(100,116,139,0.2);"></div>Free</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(34,211,238,0.4);"></div>Used</div>
+    </div>
+    <div class="mem-grid" id="swap-grid"></div>
+    <div style="margin-top:12px; border-top:1px solid var(--glass-border); padding-top:10px;">
+      <div class="panel__header">
+        <span class="panel__title">WSClock Algorithm</span>
+      </div>
+      <div class="wsclock-info" id="wsclock-info"></div>
+      <div class="clock-ring-container" id="clock-ring"></div>
+    </div>
+  </section>
+
+  <!-- ── Charts ──────────────────────────────────────────────── -->
+  <section class="panel" id="chart-panel">
+    <div class="panel__header">
+      <span class="panel__title">Performance Charts</span>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;">Page Fault Rate Over Time</div>
+    <div class="chart-container">
+      <canvas id="chart-fault-rate"></canvas>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;margin-top:10px;">TLB Hit Rate Over Time</div>
+    <div class="chart-container">
+      <canvas id="chart-tlb-rate"></canvas>
+    </div>
+    <div id="recommendation" class="recommendation" style="display:none;"></div>
+  </section>
+
+  <!-- ── Event Log ───────────────────────────────────────────── -->
+  <section class="panel log-section" id="log-panel">
+    <div class="panel__header">
+      <span class="panel__title">Event Log</span>
+      <span class="panel__badge" id="log-badge">0 events</span>
+    </div>
+    <div class="log-container" id="log-container"></div>
+  </section>
+
+</main>
+
+<!-- ── Manual Access Modal ────────────────────────────────────── -->
+<div class="modal-overlay" id="access-modal">
+  <div class="modal">
+    <div class="modal__title">Manual Memory Access</div>
+    <div class="modal__field">
+      <label for="access-pid">Process ID (PID)</label>
+      <input type="number" id="access-pid" min="1" value="1">
+    </div>
+    <div class="modal__field">
+      <label for="access-vpn">Virtual Page Number (VPN)</label>
+      <input type="number" id="access-vpn" min="0" value="0">
+    </div>
+    <div class="modal__field">
+      <label for="access-type">Access Type</label>
+      <select id="access-type">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+    </div>
+    <div class="modal__actions">
+      <button class="btn" id="access-cancel">Cancel</button>
+      <button class="btn btn--primary" id="access-submit">Execute</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create Process Modal ───────────────────────────────────── -->
+<div class="modal-overlay" id="create-proc-modal">
+  <div class="modal">
+    <div class="modal__title">Create Process</div>
+    <div class="modal__field">
+      <label for="proc-name">Process Name</label>
+      <input type="text" id="proc-name" value="MyProcess">
+    </div>
+    <p style="font-size:0.72rem;color:var(--text-muted);margin-bottom:8px;">
+      Default regions (code 0-63, heap 64-191, stack 192-255) will be created automatically.
+    </p>
+    <div class="modal__actions">
+      <button class="btn" id="create-proc-cancel">Cancel</button>
+      <button class="btn btn--primary" id="create-proc-submit">Create</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
