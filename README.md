@@ -6,7 +6,7 @@
 
 ---
 
-## Table of Contents
+## Table of Content
 
 - [Overview](#overview)
 - [Features](#features)
